@@ -1,5 +1,5 @@
 SOURCES=$(wildcard *.cpp)
-CPPFLAGS=-static-libstdc++ -g --std=c++14
+CPPFLAGS=-static-libstdc++ --std=c++14
 OUTPUT=out
 
 all:
@@ -8,6 +8,6 @@ all:
 debug: adddebug all
 
 adddebug:
-	$(eval CPPFLAGS=$(CPPFLAGS) -DDEBUG)
+	$(eval CPPFLAGS=$(CPPFLAGS) -DDEBUG -g)
 
 .PHONY: all debug adddebug
