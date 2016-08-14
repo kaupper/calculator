@@ -4,7 +4,7 @@
 #define FUNC(n, x) [](double n) {x}
 
 typedef double (*function)(double number);
-map<string, function> functions = {
+static map<string, function> functions = {
 	make_pair("sqrt", 	FUNC(n, return sqrt(n);)),
 	make_pair("sin", 	FUNC(n, return sin(n);)),
 	make_pair("cos", 	FUNC(n, return cos(n);)),
@@ -17,10 +17,10 @@ map<string, function> functions = {
 	make_pair("deg", 	FUNC(n, return (double)(n / PI * 180.0);)),
 	make_pair("rad",	FUNC(n, return (double)(n / 180.0 * PI);))
 };
-vector<vector<char>> rightOps = {{}, {'^'}, {}, {}};
-vector<vector<char>> leftOps = {{}, {}, {'*', '/'}, {'+', '-'}};
+static const vector<vector<char>> rightOps = {{}, {'^'}, {}, {}};
+static const vector<vector<char>> leftOps = {{}, {}, {'*', '/'}, {'+', '-'}};
 
-double doCalculation(double num1, double num2, char op) {
+static double doCalculation(double num1, double num2, char op) {
 	switch(op) {
 		case '*': return num1 * num2;
 		case '/': return num1 / num2;
@@ -32,65 +32,81 @@ double doCalculation(double num1, double num2, char op) {
 	return 0;
 }
 
-double calc(string input)
+ParsingResult parse(string input) 
 {
-	vector<double> numbers;
-	vector<string> operations;
-	
-	double result = 0.0;
+    ParsingResult result;
+	vector<double>& numbers = result.numbers;
+	vector<string>& operations = result.operations;
+    
+    double number = 0;
 
 	bool greaterZero = true;
 	int decimalPosition = 1;
-	double number = 0;
 
 	int opened = 0;
-	int firstOpenedIndex = -1;
 	int closed = 0;
-	int lastOp = -1;
+	int firstOpenedIndex = -1;
+    
 	int numberSign = 1;
+	int lastOp = -1;
+    
 	string func = "";
-
+    
+    
 	for(int i = 0; i < input.size(); i++) {
 		char c = input[i];
+        
+        // open bracket.
 		if(c == '(') {
 			if(func != "") {
+                // save function if there was any
 				operations.push_back(func);
 				func = "";
 			} 	
 			if(opened == 0) {
+                // save first opening position
 				firstOpenedIndex = i;
 			}
-			opened++;
-		} else if(c == ')') {
-			closed++;
+		    opened++;
+            continue;
+        } else if(c == ')') {
 			if(opened == closed) {
 				string innerExpression = input.substr(firstOpenedIndex + 1, i - firstOpenedIndex - 1);
 				number = calc(innerExpression);
-			}
-			continue;
-		}
+            }
+			closed++;
+            continue;
+        }
 
+        // if we are in a bracket term we do not need to parse further here
 		if(opened != closed) {
 			continue;
 		}
-
+        
+        //
 		if(lastOp == i - 1 && c == '-') {
 			numberSign *= -1;
 			continue;
 		}
 
 		if(find(leftOps, c) || find(rightOps, c)) {
-			numbers.push_back(number * numberSign);
-			numberSign = 1;
+            // if we encounter an operator, save last number and operator and reset variables
+            numbers.push_back(number * numberSign);
 			operations.push_back(string(1, c));
-			number = 0;
+			
+            number = 0;
+            decimalPosition = 1;
+			numberSign = 1;
 			greaterZero = true;
 			lastOp = i;
 		} else if(c == '.') {
-			greaterZero = false;
+			// after a period we have to add decimal digits
+            greaterZero = false;
 		} else if(c >= 'a' && c <= 'z') {
+            // characters are only used for functions so far
 			func += c;
 		} else if(c >= '0' && c <= '9') {
+            // add digit 
 			if(greaterZero) {
 				number *= 10;
 				number += c - '0';
@@ -101,11 +117,12 @@ double calc(string input)
 			}		
 		} else {
 			cerr << "unknown sign: " << c << endl;
-			return -1;
+			return move(ParsingResult());
 		}	
 	}
+    // add last token (number)
 	numbers.push_back(number * numberSign);
-
+       
 #ifdef DEBUG
 	cout << "numbers:" << endl;
 	for(double n : numbers) {
@@ -118,6 +135,14 @@ double calc(string input)
 	cout << endl;
 #endif
 
+    return result;
+}
+
+double process(ParsingResult& parsedInput)
+{
+    vector<double>& numbers = parsedInput.numbers;
+	vector<string>& operations = parsedInput.operations;
+    
 	// precedences:
 	// 0: functions
 	// 1: ^
@@ -125,6 +150,7 @@ double calc(string input)
 	// 3: + -
 	for(int precedence = 0; precedence < 4; precedence++) {
 		if(precedence == 1) {
+            // process pow calls (sqrt calls are functions)
 			for(int i = operations.size() - 1; i >= 0; i--) {
 				if(operations[i].size() == 1 && find(rightOps[precedence], operations[i][0])) {
 #ifdef DEBUG
@@ -142,6 +168,7 @@ double calc(string input)
 		} else {
 			for(int i = 0; i < operations.size(); i++) {
 				if(precedence == 0) {
+                    // process function calls
 					if(operations[i].size() > 1) {
 						if(functions.find(operations[i]) != functions.end()) {
 #ifdef DEBUG
@@ -160,6 +187,7 @@ double calc(string input)
 						}
 					}
 				} else if(precedence >= 2) {
+                    // process * and /, + and - calls
 					if(operations[i].size() == 1 && find(leftOps[precedence], operations[i][0])) {
 #ifdef DEBUG
 						cout << "do: " << numbers[i] << operations[i] << numbers[i + 1];
@@ -177,10 +205,17 @@ double calc(string input)
 			}
 		}
 	}
+    
 #ifdef DEBUG
 	cout << endl;
 #endif
 
-	result = numbers[0];
-	return result;
+    return numbers[0];
+}
+
+double calc(string input)
+{
+    ParsingResult parsedInput = parse(input);
+    double result = process(parsedInput);
+    return result;
 }

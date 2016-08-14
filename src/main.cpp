@@ -10,10 +10,10 @@ int main(int argc, const char* argv[])
 		std::string input;
 		getline(cin, input);
 		
-		vector<char> whitespaces = {' ', '\r', '\n', '\t'};
+		const vector<char> whitespaces = {' ', '\r', '\n', '\t'};
 		stringstream ss;
 		for(char c : input) {
-			if(find(whitespaces.begin(), whitespaces.end(), c) == whitespaces.end()) {
+			if(find(whitespaces, c)) {
 				ss << c;
 			}
 		}

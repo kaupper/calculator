@@ -31,4 +31,10 @@ template <class T> bool find(vector<vector<T>> v, T i)
 	return false;
 }
 
+
+struct ParsingResult {
+    vector<double> numbers;
+    vector<string> operations;
+};
+
 #endif

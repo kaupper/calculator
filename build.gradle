@@ -22,6 +22,7 @@ model {
             binaries.all {
                 if (buildType == buildTypes.debug) {
                     cppCompiler.define 'DEBUG'
+                    cppCompiler.args '-g'
                 }
                 cppCompiler.args '--std=gnu++14'
                 linker.args '-static-libstdc++'
