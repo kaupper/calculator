@@ -13,7 +13,7 @@ int main(int argc, const char* argv[])
 		const vector<char> whitespaces = {' ', '\r', '\n', '\t'};
 		stringstream ss;
 		for(char c : input) {
-			if(find(whitespaces, c)) {
+			if(!find(whitespaces, c)) {
 				ss << c;
 			}
 		}

@@ -34,11 +34,11 @@ static double doCalculation(double num1, double num2, char op) {
 
 ParsingResult parse(string input) 
 {
-    ParsingResult result;
+	ParsingResult result;
 	vector<double>& numbers = result.numbers;
 	vector<string>& operations = result.operations;
-    
-    double number = 0;
+
+	double number = 0;
 
 	bool greaterZero = true;
 	int decimalPosition = 1;
@@ -46,67 +46,67 @@ ParsingResult parse(string input)
 	int opened = 0;
 	int closed = 0;
 	int firstOpenedIndex = -1;
-    
+
 	int numberSign = 1;
 	int lastOp = -1;
-    
+
 	string func = "";
-    
-    
+
+
 	for(int i = 0; i < input.size(); i++) {
 		char c = input[i];
-        
-        // open bracket.
+
+		// open bracket.
 		if(c == '(') {
 			if(func != "") {
-                // save function if there was any
+				// save function if there was any
 				operations.push_back(func);
 				func = "";
 			} 	
 			if(opened == 0) {
-                // save first opening position
+				// save first opening position
 				firstOpenedIndex = i;
 			}
-		    opened++;
-            continue;
-        } else if(c == ')') {
+			opened++;
+			continue;
+		} else if(c == ')') {
+			closed++;
 			if(opened == closed) {
 				string innerExpression = input.substr(firstOpenedIndex + 1, i - firstOpenedIndex - 1);
 				number = calc(innerExpression);
-            }
-			closed++;
-            continue;
-        }
+			}
+			continue;
+		}
 
-        // if we are in a bracket term we do not need to parse further here
+		// if we are in a bracket term we do not need to parse further here
 		if(opened != closed) {
 			continue;
 		}
-        
-        //
+
+		//
 		if(lastOp == i - 1 && c == '-') {
 			numberSign *= -1;
 			continue;
 		}
 
 		if(find(leftOps, c) || find(rightOps, c)) {
-            // if we encounter an operator, save last number and operator and reset variables
-            numbers.push_back(number * numberSign);
+			// if we encounter an operator, save last number and operator and reset variables
+			numbers.push_back(number * numberSign);
 			operations.push_back(string(1, c));
-			
-            number = 0;
-            decimalPosition = 1;
+
+			number = 0;
+			decimalPosition = 1;
 			numberSign = 1;
 			greaterZero = true;
 			lastOp = i;
 		} else if(c == '.') {
 			// after a period we have to add decimal digits
-            greaterZero = false;
+			greaterZero = false;
 		} else if(c >= 'a' && c <= 'z') {
-            // characters are only used for functions so far
+			// characters are only used for functions so far
 			func += c;
 		} else if(c >= '0' && c <= '9') {
-            // add digit 
+			// add digit 
 			if(greaterZero) {
 				number *= 10;
 				number += c - '0';
@@ -117,12 +117,12 @@ ParsingResult parse(string input)
 			}		
 		} else {
 			cerr << "unknown sign: " << c << endl;
-			return move(ParsingResult());
+			return ParsingResult();
 		}	
 	}
-    // add last token (number)
+	// add last token (number)
 	numbers.push_back(number * numberSign);
-       
+
 #ifdef DEBUG
 	cout << "numbers:" << endl;
 	for(double n : numbers) {
@@ -135,14 +135,14 @@ ParsingResult parse(string input)
 	cout << endl;
 #endif
 
-    return result;
+	return result;
 }
 
-double process(ParsingResult& parsedInput)
+double process(ParsingResult parsedInput)
 {
-    vector<double>& numbers = parsedInput.numbers;
+	vector<double>& numbers = parsedInput.numbers;
 	vector<string>& operations = parsedInput.operations;
-    
+
 	// precedences:
 	// 0: functions
 	// 1: ^
@@ -150,7 +150,7 @@ double process(ParsingResult& parsedInput)
 	// 3: + -
 	for(int precedence = 0; precedence < 4; precedence++) {
 		if(precedence == 1) {
-            // process pow calls (sqrt calls are functions)
+			// process pow calls (sqrt calls are functions)
 			for(int i = operations.size() - 1; i >= 0; i--) {
 				if(operations[i].size() == 1 && find(rightOps[precedence], operations[i][0])) {
 #ifdef DEBUG
@@ -168,9 +168,9 @@ double process(ParsingResult& parsedInput)
 		} else {
 			for(int i = 0; i < operations.size(); i++) {
 				if(precedence == 0) {
-                    // process function calls
+					// process function calls
 					if(operations[i].size() > 1) {
-						if(functions.find(operations[i]) != functions.end()) {
+						if(find(functions, operations[i])) {
 #ifdef DEBUG
 							cout << "do: " << operations[i] << "(" << numbers[i] << ")";
 #endif
@@ -178,7 +178,7 @@ double process(ParsingResult& parsedInput)
 #ifdef DEBUG
 							cout << "=" << numbers[i] << endl;
 #endif
-							
+
 							operations.erase(operations.begin() + i);
 							i--;
 						} else {
@@ -187,7 +187,7 @@ double process(ParsingResult& parsedInput)
 						}
 					}
 				} else if(precedence >= 2) {
-                    // process * and /, + and - calls
+					// process * and /, + and - calls
 					if(operations[i].size() == 1 && find(leftOps[precedence], operations[i][0])) {
 #ifdef DEBUG
 						cout << "do: " << numbers[i] << operations[i] << numbers[i + 1];
@@ -205,17 +205,17 @@ double process(ParsingResult& parsedInput)
 			}
 		}
 	}
-    
+
 #ifdef DEBUG
 	cout << endl;
 #endif
 
-    return numbers[0];
+	return numbers[0];
 }
 
 double calc(string input)
 {
-    ParsingResult parsedInput = parse(input);
-    double result = process(parsedInput);
-    return result;
+	ParsingResult parsedInput = parse(input);
+	double result = process(parsedInput);
+	return result;
 }

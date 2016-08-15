@@ -11,10 +11,19 @@
 
 using namespace std;
 
+struct ParsingResult {
+    vector<double> numbers;
+    vector<string> operations;
+};
+
+
 double calc(std::string calculation);
+ParsingResult parse(std::string input);
+double process(ParsingResult);
+
+
 
 const long double PI = 3.141592653589793238L;
-
 
 template <class T> bool find(vector<T> v, T i)
 {
@@ -31,10 +40,9 @@ template <class T> bool find(vector<vector<T>> v, T i)
 	return false;
 }
 
-
-struct ParsingResult {
-    vector<double> numbers;
-    vector<string> operations;
-};
+template <class T, class U> bool find(map<T, U> m, T k)
+{
+	return m.find(k) != m.end();
+}
 
 #endif
