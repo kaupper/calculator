@@ -7,32 +7,33 @@
 
 #include "calculator.h"
 
+map<string, double (*)(double)> NumberExpression::functions = {
+	make_pair("sqrt", 	FUNC(n, return sqrt(n);)),
+	make_pair("sin", 	FUNC(n, return sin(n);)),
+	make_pair("cos", 	FUNC(n, return cos(n);)),
+	make_pair("tan", 	FUNC(n, return tan(n);)),
+	make_pair("asin", 	FUNC(n, return asin(n);)),
+	make_pair("acos", 	FUNC(n, return acos(n);)),
+	make_pair("atan", 	FUNC(n, return atan(n);)),
+	make_pair("floor", 	FUNC(n, return floor(n);)),
+	make_pair("ceil", 	FUNC(n, return ceil(n);)),
+	make_pair("deg", 	FUNC(n, return (double)(n / PI * 180.0);)),
+	make_pair("rad",	FUNC(n, return (double)(n / 180.0 * PI);))
+};
+const vector<vector<char>> NumberExpression::rightOps = {{}, {'^'}, {}, {}};
+const vector<vector<char>> NumberExpression::leftOps = {{}, {}, {'*', '/'}, {'+', '-'}};
 
+const vector<string> NumberExpression::expressionOps = {":=", "="};
 
-ExpressionParsingResult parse(string input)
+void NumberExpression::parse() 
 {
-	ExpressionParsingResult result;
-
-	errorFlag = false;
-	return result;
-}
-
-CalculationParsingResult parseCalculation(string input) 
-{
-	CalculationParsingResult result;
-	vector<double>& numbers = result.numbers;
-	vector<string>& operations = result.operations;
-
-	double number = 0;
-
-	bool greaterZero = true;
-	int decimalPosition = 1;
+	const string& input = expression;
+	string number = "";
 
 	int opened = 0;
 	int closed = 0;
 	int firstOpenedIndex = -1;
 
-	int numberSign = 1;
 	int lastOp = -1;
 
 	string func = "";
@@ -41,15 +42,12 @@ CalculationParsingResult parseCalculation(string input)
 	for(int i = 0; i < input.size(); i++) {
 		char c = input[i];
 
-		// open bracket.
 		if(c == '(') {
 			if(func != "") {
-				// save function if there was any
 				operations.push_back(func);
 				func = "";
 			} 	
 			if(opened == 0) {
-				// save first opening position
 				firstOpenedIndex = i;
 			}
 			opened++;
@@ -58,66 +56,65 @@ CalculationParsingResult parseCalculation(string input)
 			closed++;
 			if(opened == closed) {
 				string innerExpression = input.substr(firstOpenedIndex + 1, i - firstOpenedIndex - 1);
-				number = calculate(innerExpression);
+				NumberExpression expression;
+				expression.setExpression(innerExpression);
+				expression.parse();
+				numbers.push_back(expression);
+
 				if(errorFlag) {
-					return CalculationParsingResult();
+					return;
 				}
 			}
 			continue;
 		}
 
-		// if we are in a bracket term we do not need to parse further here
 		if(opened != closed) {
 			continue;
 		}
 
-		//
 		if(lastOp == i - 1 && c == '-') {
-			numberSign *= -1;
+			number = "-" + number;
 			continue;
 		}
 
 		if(find(leftOps, c) || find(rightOps, c)) {
-			// if we encounter an operator, save last number and operator and reset variables
-			numbers.push_back(number * numberSign);
+			NumberExpression expression;
+			if(number != "") {
+				expression.setValue(number);
+			} else if(func != "") {
+				expression.setValue(func);
+			}
+			numbers.push_back(expression);
 			operations.push_back(string(1, c));
 
-			number = 0;
-			decimalPosition = 1;
-			numberSign = 1;
-			greaterZero = true;
+			func = "";
+			number = "";
 			lastOp = i;
-		} else if(c == '.') {
-			// after a period we have to add decimal digits
-			greaterZero = false;
 		} else if(c >= 'a' && c <= 'z') {
-			// characters are only used for functions so far
 			func += c;
-		} else if(c >= '0' && c <= '9') {
-			// add digit 
-			if(greaterZero) {
-				number *= 10;
-				number += c - '0';
-			} else {
-				int digit = c - '0';
-				double exponent = pow(10, -(decimalPosition++));
-				number += (digit * exponent);
-			}		
+		} else if(c == '.' || (c >= '0' && c <= '9')) {
+			number += c;
 		} else {
 			stringstream ss;
 			ss << "unknown sign: " << c;
 			error = ss.str();
 			errorFlag = true;
-			return CalculationParsingResult();
+			return;
 		}	
 	}
-	// add last token (number)
-	numbers.push_back(number * numberSign);
+
+	NumberExpression expression;
+	if(number != "") {
+		expression.setValue(number);
+	} else if(func != "") {
+		expression.setValue(func);
+	}
+	numbers.push_back(expression);
 
 #ifdef DEBUG
 	cout << "numbers:" << endl;
-	for(double n : numbers) {
-		cout << n << " ";
+	for(NumberExpression n : numbers) {
+		cout << n.getValue() << " ";
 	}
 	cout << endl << "operations:" << endl;
 	for(string o : operations) {
@@ -125,7 +122,37 @@ CalculationParsingResult parseCalculation(string input)
 	}
 	cout << endl;
 #endif
+
 	errorFlag = false;
+}
+
+
+/*
+ExpressionParsingResult parseExpression(string input)
+{
+	ExpressionParsingResult result;
+	result.rhs = input;
+
+	for(string operation : expressionOps) {
+		int index = 0;
+		if((index = input.find(operation)) != string::npos) {
+			result.lhs = input.substr(0, index);
+			result.operation = input.substr(index, operation.size());
+			result.rhs = input.substr(index + operation.size());
+			break;
+		}
+	}
+
+#ifdef DEBUG
+	cout << "expression" << endl;
+	cout << "lhs      : " << result.lhs << endl;
+	cout << "operation: " << result.operation << endl;
+	cout << "rhs      : " << result.rhs << endl;
+	cout << endl;
+#endif
+
 	return result;
 }
+*/
+
 

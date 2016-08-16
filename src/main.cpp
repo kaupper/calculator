@@ -21,17 +21,10 @@ int main(int argc, const char* argv[])
 				}
 			}
 			cout << calculate(ss.str()) << endl;
-			if(errorFlag) {
-				break;
-			}			
 
 			cout << "> ";		
 			getline(cin, input);
 		} while(input != "");
-	}
-
-	if(errorFlag) {
-		cerr << "Program exited with error: \"" << error << "\"" << endl;
 	}
 
 	return 0;

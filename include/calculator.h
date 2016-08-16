@@ -11,9 +11,36 @@
 
 using namespace std;
 
-struct CalculationParsingResult {
-	vector<double> numbers;
+class NumberExpression {
+private:
+	static map<string, double (*)(double)> functions;
+
+	static const vector<vector<char>> leftOps;
+	static const vector<vector<char>> rightOps;
+	static const vector<string> expressionOps;
+
+	static double resolveValue(NumberExpression);
+
+
+	vector<NumberExpression> numbers;
 	vector<string> operations;
+	string value;
+
+	string expression;
+
+	bool errorFlag;
+	string error;
+
+public:
+	NumberExpression() : errorFlag(false), error(""), expression(""), value("") {}
+	void process();
+	void parse();
+
+	void setValue(string v) { value = v; }
+	string getValue() { return value; }
+
+	string getExpression() { return expression; }
+	void setExpression(string expr) { expression = expr; } 
 };
 
 struct ExpressionParsingResult {
@@ -22,22 +49,19 @@ struct ExpressionParsingResult {
 	string operation;
 };
 
+struct DataStore {
+	map<string, double> variables;
+	map<string, pair<string, string>> functions;
+};
+
 
 // declare shared variables
-typedef double (*function)(double number);
-extern map<string, function> functions; 
-extern const vector<vector<char>> rightOps;
-extern const vector<vector<char>> leftOps; 
-extern const vector<string> expressionOps;
-extern bool errorFlag;
-extern string error;
+extern DataStore store;
 
 
 // function declarations
 double calculate(string);
-ExpressionParsingResult parse(string);
-CalculationParsingResult parseCalculation(string);
-double process(CalculationParsingResult);
+// ExpressionParsingResult parseExpression(string);
 
 
 
