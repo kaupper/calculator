@@ -35,7 +35,7 @@ import ycm_core
 
 flags = [
     '-x',
-    'c++',
+    'c++14',
     '-I../include',
 ]
 
