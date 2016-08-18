@@ -1,11 +1,11 @@
 /*
- * parse.cpp
+ * numberexpression_parse.cpp
  * Copyright (C) 2016 sebastian <sebastian@ARCH-LINUX>
  *
  * Distributed under terms of the MIT license.
  */
 
-#include "calculator.h"
+#include "numberexpression.h"
 
 map<string, double (*)(double)> NumberExpression::functions = {
 	make_pair("sqrt", 	FUNC(n, return sqrt(n);)),
@@ -23,24 +23,9 @@ map<string, double (*)(double)> NumberExpression::functions = {
 const vector<vector<char>> NumberExpression::rightOps = {{}, {'^'}, {}, {}};
 const vector<vector<char>> NumberExpression::leftOps = {{}, {}, {'*', '/'}, {'+', '-'}};
 
-const vector<string> NumberExpression::expressionOps = {":=", "="};
 
-string NumberExpression::error;
-bool NumberExpression::errorFlag;
-
-
-void NumberExpression::parse() 
+void NumberExpression::_parse() 
 {
-	if(expression == "") {
-		errorFlag = true;
-		error = "no expression to parse";
-		return;
-	}
-	
-	if(errorFlag) {
-		return;
-	}
-	
 	numbers.clear();
 	operations.clear();
 	
@@ -73,11 +58,10 @@ void NumberExpression::parse()
 				string innerExpression = input.substr(firstOpenedIndex + 1, i - firstOpenedIndex - 1);
 				NumberExpression exp(innerExpression);
 				exp.parse();
-				numbers.push_back(exp);
-			
-				if(errorFlag) {
+				if(exp.hasError()) {
 					return;
 				}
+				numbers.push_back(exp);
 			}
 			continue;
 		}
@@ -135,8 +119,6 @@ void NumberExpression::parse()
 	}
 	cout << endl;
 #endif
-
-	parsed = true;
 }
 
 

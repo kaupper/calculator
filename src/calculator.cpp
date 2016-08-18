@@ -9,8 +9,7 @@ ExpressionParsingResult parseExpression(string input)
 
 double calculate(string input)
 {
-	NumberExpression expression;
-	expression.setExpression(input);
+	NumberExpression expression(input);
 	expression.parse();
-	return 0.0;
+	return NumberExpression::resolveValue(expression);
 }

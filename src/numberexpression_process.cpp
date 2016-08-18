@@ -1,57 +1,27 @@
 /*
- * process.cpp
+ * numberexpression_process.cpp
  * Copyright (C) 2016 sebastian <sebastian@ARCH-LINUX>
  *
  * Distributed under terms of the MIT license.
  */
 
-#include "calculator.h"
+#include "numberexpression.h"
 
-DataStore NumberExpression::store;
-
-string NumberExpression::getValue()
+double NumberExpression::_resolveValue()
 {
-	if(errorFlag) {
-		return "";
-	}
-	
-	if(value == "") {
-		process();
-	} 
-	
-	if(value == "") {
-		if(errorFlag) {
-			return "";
-		}
-		errorFlag = true;
-		error = "process() must set the value!";
-	}
-	
-	return value;
-}
-
-double NumberExpression::resolveValue(NumberExpression& exp)
-{
-	if(errorFlag) {
-		return 0.0;
-	}
-	
-	double value = 0.0;
 	try {
-		value = stod(exp.getValue());
+		doubleValue = stod(stringValue);
 	} catch (invalid_argument e) {
-		if(errorFlag) {
-			return 0.0;
-		}
-		if(find(store.variables, exp.getValue())) {
-			value = store.variables[exp.getValue()];
+		if(getStore().hasVariable(stringValue)) {
+			doubleValue = getStore().getVariable(stringValue);
 		} else {
-			error = "symbol not found: " + exp.getValue();
+			error = "symbol not found: " + stringValue;
 			errorFlag = true;
+			doubleValue = 0.0;
 		}
 	}
 	
-	return value;
+	return doubleValue;
 }
 
 
@@ -66,7 +36,8 @@ string NumberExpression::doCalculation(NumberExpression& num, string func)
 	
 	if(find(functions, func)) {
 		result = functions[func](n);
-	} else if(find(store.functions, func)) {
+	} else if(getStore().hasFunction(func)) {
+		std::pair<std::string, std::string> function = getStore().getFunction(func);
 		// TODO: process functions
 		error = "processing of custom functions not implemented yet!";
 		errorFlag = true;
@@ -101,20 +72,8 @@ string NumberExpression::doCalculation(NumberExpression& num1, NumberExpression&
 }
 
 
-void NumberExpression::process()
+void NumberExpression::_process()
 {	
-	if(!parsed) {
-		parse();
-	}
-	
-	if(errorFlag) {
-		return;
-	}
-	
-	if (value != "") {
-		return;
-	}
-
 	for(NumberExpression& exp : numbers) {
 		exp.process();
 	}

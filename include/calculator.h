@@ -9,64 +9,12 @@
 #include <cmath>
 #include <map>
 
-using namespace std;
-
-class NumberExpression {
-private:
-	static map<string, double (*)(double)> functions;
-
-	static const vector<vector<char>> leftOps;
-	static const vector<vector<char>> rightOps;
-	static const vector<string> expressionOps;
-
-	static double resolveValue(NumberExpression);
-
-
-	vector<NumberExpression> numbers;
-	vector<string> operations;
-	string value;
-
-	string expression;
-
-	bool errorFlag;
-	string error;
-
-public:
-	NumberExpression() : errorFlag(false), error(""), expression(""), value("") {}
-	void process();
-	void parse();
-
-	void setValue(string v) { value = v; }
-	string getValue() { return value; }
-
-	string getExpression() { return expression; }
-	void setExpression(string expr) { expression = expr; } 
-};
-
-struct ExpressionParsingResult {
-	string lhs;
-	string rhs;
-	string operation;
-};
-
-struct DataStore {
-	map<string, double> variables;
-	map<string, pair<string, string>> functions;
-};
-
-
-// declare shared variables
-extern DataStore store;
-
 
 // function declarations
 double calculate(string);
-// ExpressionParsingResult parseExpression(string);
-
 
 
 // utils
-
 #define FUNC(n, x) [](double n) {x}
 #define DEF_FUNC(name, body) make_pair(name, FUNC(n, body))
 
@@ -91,5 +39,9 @@ template <class T, class U> bool find(map<T, U> m, T k)
 {
 	return m.find(k) != m.end();
 }
+
+#include "expression.h"
+#include "numberexpression.h"
+#include "formalexpression.h"
 
 #endif
