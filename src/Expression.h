@@ -2,7 +2,6 @@
 #define EXPRESSION_H
 
 #include <memory>
-#include <cmath>
 #include <vector>
 #include <map>
 #include <string>
@@ -10,17 +9,13 @@
 
 #include "Parser.h"
 
-class Parser;
-class Expression;
-
-
 
 typedef std::function<Parser::Number(const Expression &, const Expression &)>
 Operator;
-typedef std::function<Parser::Number(Parser::Number)> Function;
+typedef std::function<Parser::Number(const Parser::Number)> Function;
 
 #define OP(param1, param2, body) [](const Expression &param1, const Expression &param2) -> Parser::Number { return body; }
-#define FN(v, body) [](Parser::Number v) -> Parser::Number { return body; }
+#define FN(v, body) [](const Parser::Number v) -> Parser::Number { return body; }
 
 class Expression
 {
@@ -55,7 +50,7 @@ class Expression
 class NumberExpression : public Expression
 {
     public:
-        NumberExpression(Parser::Number value) : value(value) {}
+        NumberExpression(const Parser::Number value) : value(value) {}
         virtual ~NumberExpression() {}
         
         virtual Parser::Number getValue() const override

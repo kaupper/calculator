@@ -3,11 +3,8 @@
 
 #include <memory>
 #include <string>
-#include <algorithm>
 #include <sstream>
 #include <functional>
-#include <cmath>
-#include <cctype>
 
 
 class Expression;
