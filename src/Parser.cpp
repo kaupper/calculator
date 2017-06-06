@@ -6,11 +6,6 @@ std::function<Parser::Number(const std::string &)> Parser::toNumber =
     return std::stold(s);
 };
 
-AssignmentExpression Parser::ParseString(const std::string &calculation)
-{
-    // TODO
-    return {};
-}
 
 static std::shared_ptr<Expression> getBracketExpression(const std::string &expr,
         size_t &bracketIndex)
@@ -34,14 +29,14 @@ static std::shared_ptr<Expression> getBracketExpression(const std::string &expr,
     if (closingBracket == std::string::npos) {
         throw std::string("Invalid number of brackets!");
     } else {
-        auto tmp = Parser::ParseExpression(expr.substr(bracketIndex + 1,
-                                           closingBracket - bracketIndex - 1));
+        auto tmp = Parser::Parse(expr.substr(bracketIndex + 1,
+                                             closingBracket - bracketIndex - 1));
         bracketIndex = closingBracket;
         return tmp;
     }
 }
 
-std::shared_ptr<Expression> Parser::ParseExpression(const std::string &expr)
+std::shared_ptr<Expression> Parser::Parse(const std::string &expr)
 {
     std::shared_ptr<Expression> expression = std::make_shared<Expression>();
     std::stringstream number;

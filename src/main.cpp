@@ -1,6 +1,9 @@
-#include "Parser.h"
 #include <iostream>
 #include <iomanip>
+#include <cmath>
+
+#include "Parser.h"
+
 
 static bool almost(Parser::Number d1, Parser::Number d2)
 {
@@ -10,12 +13,11 @@ static bool almost(Parser::Number d1, Parser::Number d2)
 
 int main()
 {
-    Expression::AddOperator('+', OP(e1, e2, e1.getValue() + e2.getValue()));
-    Expression::AddOperator('-', OP(e1, e2, e1.getValue() - e2.getValue()));
-    Expression::AddOperator('*', OP(e1, e2, e1.getValue() * e2.getValue()));
-    Expression::AddOperator('/', OP(e1, e2, e1.getValue() / e2.getValue()));
-    Expression::AddOperator('^', OP(e1, e2,
-                                    std::pow(e1.getValue(), e2.getValue())));
+    Expression::AddOperator('+', 1, OP(v1, v2, v1 + v2));
+    Expression::AddOperator('-', 1, OP(v1, v2, v1 - v2));
+    Expression::AddOperator('*', 2, OP(v1, v2, v1 * v2));
+    Expression::AddOperator('/', 2, OP(v1, v2, v1 / v2));
+    Expression::AddOperator('^', 3, OP(v1, v2, std::pow(v1, v2)));
     Expression::AddFunction("sin", FN(v, std::sin(v)));
     Expression::AddFunction("cos", FN(v, std::cos(v)));
     Expression::AddFunction("tan", FN(v, std::tan(v)));
@@ -39,7 +41,7 @@ int main()
     
     for (auto &test : tests) {
         try {
-            auto expression = Parser::ParseExpression(test.first);
+            auto expression = Parser::Parse(test.first);
             auto result = expression->getValue();
             std::cout << std::setw(45) << std::right << test.first << std::left
                       << std::string(5, ' ')

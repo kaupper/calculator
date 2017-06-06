@@ -2,24 +2,36 @@
 #define EXPRESSION_H
 
 #include <memory>
-#include <vector>
+#include <list>
 #include <map>
 #include <string>
+#include <algorithm>
 #include <functional>
 
 #include "Parser.h"
 
 
-typedef std::function<Parser::Number(const Expression &, const Expression &)>
-Operator;
+typedef std::function<Parser::Number(std::shared_ptr<Expression>, std::shared_ptr<Expression>)>
+OperatorFunction;
 typedef std::function<Parser::Number(const Parser::Number)> Function;
 
-#define OP(param1, param2, body) [](const Expression &param1, const Expression &param2) -> Parser::Number { return body; }
+#define OP(value1, value2, body) [](std::shared_ptr<Expression> __param1, std::shared_ptr<Expression> __param2) -> Parser::Number \
+    {\
+        Parser::Number value1 = __param1->getValue(), value2 = __param2->getValue();\
+        return body;\
+    }
+
 #define FN(v, body) [](const Parser::Number v) -> Parser::Number { return body; }
 
 class Expression
 {
         friend class Parser;
+        
+    private:
+        struct Operator {
+            size_t priority;
+            OperatorFunction f;
+        };
         
     public:
         Expression() {}
@@ -29,9 +41,9 @@ class Expression
         virtual Parser::Number getValue() const;
         
         
-        static void AddOperator(char op, const Operator f)
+        static void AddOperator(char op, size_t priority, const OperatorFunction f)
         {
-            operatorMap[op] = f;
+            operatorMap[op] = {priority, f};
         }
         
         static void AddFunction(const std::string &functionName, const Function &f)
@@ -40,17 +52,19 @@ class Expression
         }
         
     protected:
-        std::vector<std::shared_ptr<Expression>> expressions;
-        std::vector<Operator> operators;
+        std::list<std::shared_ptr<Expression>> expressions;
+        std::list<Operator> operators;
         
         static std::map<char, Operator> operatorMap;
         static std::map<std::string, Function> functionMap;
+        
 };
 
 class NumberExpression : public Expression
 {
     public:
         NumberExpression(const Parser::Number value) : value(value) {}
+        NumberExpression(const Expression &expr) : value(expr.getValue()) {}
         virtual ~NumberExpression() {}
         
         virtual Parser::Number getValue() const override
@@ -73,13 +87,14 @@ class FunctionExpression : public Expression
         virtual Parser::Number getValue() const override;
         
     protected:
-    
         std::string function;
         std::shared_ptr<Expression> arg;
 };
 
 
-
+//
+// TODO: assignments are not implemented yet!
+//
 class AssignmentExpression : public Expression
 {
     public:
