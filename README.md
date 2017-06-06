@@ -5,6 +5,7 @@ Currently (2017/06/06) supported are bracket terms, custom functions and custom 
 
 # Usage example
 
+```c++
     #include <memory>
     #include <iostream>
     #include <string>
@@ -52,3 +53,4 @@ Currently (2017/06/06) supported are bracket terms, custom functions and custom 
         
         return 0;
     }
+```
