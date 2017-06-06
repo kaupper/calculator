@@ -1,7 +1,7 @@
 # calculator
 A simple calculator written in C++
 
-Currently (2017/06/06) supported are bracket terms, custom functions and custom operators (no operator precedence!).
+Currently (2017/06/06) supported are bracket terms, custom functions and custom operators.
 
 # Usage example
 
