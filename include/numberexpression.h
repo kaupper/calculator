@@ -3,26 +3,27 @@
 
 #include "expression.h"
 
-class NumberExpression : Expression{
-private:
-	static map<string, double (*)(double)> functions;
-
-	static const vector<vector<char>> leftOps;
-	static const vector<vector<char>> rightOps;
-
-	static string doCalculation(NumberExpression&, NumberExpression&, char);
-	static string doCalculation(NumberExpression&, string);
-
-	vector<NumberExpression> numbers;
-	vector<string> operations;
-	
-	void _process();
-	void _parse();
-	double _resolveValue();
-
-public:	
-	NumberExpression() : NumberExpression("") {}
-	NumberExpression(string exp) : Expression(exp) { }
+class NumberExpression : public Expression
+{
+    private:
+        static std::map<std::string, double (*)(double)> functions;
+        
+        static const std::vector<std::vector<char>> leftOps;
+        static const std::vector<std::vector<char>> rightOps;
+        
+        static std::string doCalculation(NumberExpression &, NumberExpression &, char);
+        static std::string doCalculation(NumberExpression &, std::string);
+        
+        std::vector<NumberExpression> numbers;
+        std::vector<std::string> operations;
+        
+        void _process() override;
+        void _parse() override;
+        double _resolveValue() override;
+        
+    public:
+        NumberExpression() : NumberExpression("") {}
+        NumberExpression(const std::string &exp) : Expression(exp) { }
 };
 
 #endif

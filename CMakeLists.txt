@@ -1,0 +1,7 @@
+cmake_minimum_required (VERSION 3.1)
+set (CMAKE_CXX_STANDARD 14)
+project (calculator)
+include_directories(include/)
+file(GLOB SOURCES src/*.cpp)
+add_executable(${PROJECT_NAME} ${SOURCES})
+target_compile_options (${PROJECT_NAME} PRIVATE -pedantic -Wall -Wextra -Werror -Wno-unused-parameter -Wno-missing-braces)

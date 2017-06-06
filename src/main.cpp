@@ -1,57 +1,56 @@
-#include "calculator.h"
+#include "Parser.h"
+#include <iostream>
+#include <iomanip>
 
-using namespace std;
-
-int main(int argc, const char* argv[])
+static bool almost(Parser::Number d1, Parser::Number d2)
 {
-	bool silent = false;
-	string calculation = "";
-	std::string error;
-	
-	for(int i = 1; i < argc; i++) {
-		string arg = string(argv[i]);
-		if(arg == "-q" || arg == "--quiet" || arg == "-s" || arg == "--silent") {
-			silent = true;
-		} else {
-			calculation = arg;
-		}
-	}
-	 
-	if(calculation != "") {
-		cout << calculate(calculation) << endl;
-		if((error = NumberExpression::getError()) != "") {
-			cerr << error << endl;
-			return -1;
-		}
-		return 0;
-	}
+    static const Parser::Number epsilon = 0.001;
+    return std::fabs((d2 - d1)) < epsilon;
+}
 
-	const vector<char> whitespaces = {' ', '\r', '\n', '\t'};
-	std::string input;
-	std::stringstream ss;
-	
-	if(!silent) {
-		cout << "> ";	
-	}
-	getline(cin, input);
-	do {
-		ss.str("");
-		for(char c : input) {
-			if(!find(whitespaces, c)) {
-				ss << c;
-			}
-		}
-		cout << calculate(ss.str()) << endl;
-		
-		if((error = NumberExpression::getError()) != "") {
-			cerr << error << endl;
-		}
-		
-		if(!silent) {
-			cout << "> ";
-		}
-		getline(cin, input);
-	} while(input != "");
-	
-	return 0;
+int main()
+{
+    Expression::AddOperator('+', OP(e1, e2, e1.getValue() + e2.getValue()));
+    Expression::AddOperator('-', OP(e1, e2, e1.getValue() - e2.getValue()));
+    Expression::AddOperator('*', OP(e1, e2, e1.getValue() * e2.getValue()));
+    Expression::AddOperator('/', OP(e1, e2, e1.getValue() / e2.getValue()));
+    Expression::AddOperator('^', OP(e1, e2,
+                                    std::pow(e1.getValue(), e2.getValue())));
+    Expression::AddFunction("sin", FN(v, std::sin(v)));
+    Expression::AddFunction("cos", FN(v, std::cos(v)));
+    Expression::AddFunction("tan", FN(v, std::tan(v)));
+    Expression::AddFunction("sqrt", FN(v, std::sqrt(v)));
+    //
+    std::string calculation = "";
+    std::map<std::string, Parser::Number> tests = {
+        {"9/(2+1)", 3.},
+        {"9/cos(2-2)", 9.},
+        {"sin(0)", 0},
+        {"cos(0)", 1},
+        {"(sin(1234)^2)+(cos(1234)^2)", 1},
+        {"2/3", 0.6666},
+        {"sqrt(4)", 2.},
+        {"sqrt(2)", 1.414},
+        {"(1+2)*3", 9.},
+        {"1+2*3", 7.},
+        {"1.3-0.3", 1.},
+        {"0.1+0.2", 0.3}
+    } ;
+    
+    for (auto &test : tests) {
+        try {
+            auto expression = Parser::ParseExpression(test.first);
+            auto result = expression->getValue();
+            std::cout << std::setw(45) << std::right << test.first << std::left
+                      << std::string(5, ' ')
+                      << result << (almost(result, test.second) ? "==" : "!=") << test.second
+                      << std::endl;
+        } catch (const std::string &ex) {
+            std::cerr << test.first << std::endl;
+            std::cerr << ex << std::endl;
+            return 1;
+        }
+    }
+    
+    return 0;
 }
