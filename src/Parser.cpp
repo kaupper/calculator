@@ -36,7 +36,17 @@ static std::shared_ptr<Expression> getBracketExpression(const std::string &expr,
     }
 }
 
-std::shared_ptr<Expression> Parser::Parse(const std::string &expr)
+std::shared_ptr<Expression> Parser::Parse(std::string expr)
+{
+    auto newEnd = std::remove_if(expr.begin(), expr.end(),
+    [](auto c) {
+        return std::isspace(c);
+    });
+    expr.resize(std::distance(expr.begin(), newEnd));
+    return ParseExpression(expr);
+}
+
+std::shared_ptr<Expression> Parser::ParseExpression(const std::string &expr)
 {
     std::shared_ptr<Expression> expression = std::make_shared<Expression>();
     std::stringstream number;

@@ -11,10 +11,13 @@ class Expression;
 class Parser
 {
     public:
-        static std::shared_ptr<Expression> Parse(const std::string &expr);
+        static std::shared_ptr<Expression> Parse(std::string expr);
         
         typedef long double Number;
         static std::function<Number(const std::string &)> toNumber;
+        
+    private:
+        static std::shared_ptr<Expression> ParseExpression(const std::string &expr);
 };
 
 #include "Expression.h"

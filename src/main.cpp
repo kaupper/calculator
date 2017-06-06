@@ -26,7 +26,7 @@ int main()
     std::string calculation = "";
     std::map<std::string, Parser::Number> tests = {
         {"9/(2+1)", 3.},
-        {"9/cos(2-2)", 9.},
+        {"9/ cos(2-2)", 9.},
         {"sin(0)", 0},
         {"cos(0)", 1},
         {"(sin(1234)^2)+(cos(1234)^2)", 1},
@@ -36,7 +36,7 @@ int main()
         {"(1+2)*3", 9.},
         {"1+2*3", 7.},
         {"1.3-0.3", 1.},
-        {"0.1+0.2", 0.3}
+        {"0.1 + 0.2", 0.3}
     } ;
     
     for (auto &test : tests) {
